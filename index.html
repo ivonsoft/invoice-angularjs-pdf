@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>System wystawiania faktur - WiR</title>
+  <meta charset='utf-8'>
+  <meta name="description" content="Aplikacja do wystawiania faktur oparta na AngularJs">
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.4/angular.min.js"></script>
+  <script type="text/javascript" src="js/main.js"></script>
+</head>
+<body ng-app="invoicing" ng-controller="InvoiceCtrl" >
+  <div class="container" width="800px" id="invoice" >
+    <div class="row">
+      <!--div class="col-xs-12 heading">
+        INVOICE
+      </div-->
+    </div>
+    <div class="row branding">
+      <div class="col-xs-6" style="padding-left: 200px;width: 70%;padding-top: 20px;">
+        <div class="invoice-number-container">
+          <label for="invoice-number">FAKTURA VAT NR: </label><input type="text" id="invoice-number" ng-model="invoice.invoice_number" />
+        </div>
+      </div>
+      <div class="col-xs-6 logo-container" style="width:30%;">
+       <div class="input-container">  <label class=" .right" for="exampleInputEmail1">Miejsce sprzedaży:</label><input type="text" ng-model="invoice.company_info.miejsce_sell" style="text-align: right;
+    width: 100px;"/></div>
+        <div class="input-container"> <label class=" .right" for="exampleInputEmail1">Data wystawienia:</label><input type="text" ng-model="invoice.company_info.data_wystawienia" style="text-align: right;
+    width: 100px;"/></div>
+        <div class="input-container"> <label class=" .right" for="exampleInputEmail1">Data sprzedaży:</label><input type="text" ng-model="invoice.company_info.data_sell" style="text-align: right;
+    width: 100px;"/></div>
+      </div>
+    </div>
+    <div class="row branding">
+      <div class="col-xs-6" style="text-align:center;">
+          <label for="invoice-number">SPRZEDAWCA</label>
+      </div>
+      <div class="col-xs-6" style="text-align:center;">
+          <label for="invoice-number">NABYWCA</label>
+      </div>
+    </div>
+    <div class="row infos" style="border-bottom: groove;padding-bottom: 3px;">
+      <div class="col-xs-6 " style="border-right: groove;">
+        <div class="input-container">
+		<textarea style="width:350px;overflow:hidden; resize:none;" rows="1" class="ng-valid ng-dirty ng-valid-parse ng-touched" ng-model="invoice.company_info.name" name="text" wrap="soft" maxlength="40" > </textarea>
+		</div>
+        <div class="input-container"><input type="text" ng-model="invoice.company_info.address1"/></div>
+        <div class="input-container"><input type="text" ng-model="invoice.company_info.postal"/></div>
+        <div class="input-container"><input type="text" ng-model="invoice.company_info.NIP"/></div>
+        <div class="input-container"><input type="text" ng-model="invoice.company_info.bank"/></div>
+      </div>
+      <div class="col-xs-6 right">
+        <div class="input-container">
+        <label class="label_nabywca" for="exampleInputEmail1">NAZWA:</label>
+		    <textarea class=".infos .right"
+                 style="width:300px;overflow:hidden; resize:none;" 
+                 rows="2" 
+                 class="ng-valid ng-dirty ng-valid-parse ng-touched" 
+                 ng-model="invoice.customer_info.name"
+                 id="invoice.customer_info.name"
+                 name="text" wrap="soft" maxlength="40" 
+                 placeholder="Wpisz nazwę klienta"> </textarea>
+		    </div>
+       <label class="label_nabywca" for="exampleInputEmail1">ADRES:</label>
+        <textarea class=".infos .right"
+                 style="width:300px;overflow:hidden; resize:none;" 
+                 rows="2" 
+                 class="ng-valid ng-dirty ng-valid-parse ng-touched" 
+                 ng-model="invoice.customer_info.address1" 
+                 id="invoice.customer_info.address1" 
+                 name="text" wrap="soft" maxlength="40" 
+                 placeholder="Wpisz pełny adres klienta"> </textarea>
+        <!--div class="input-container"><input type="text" ng-model="invoice.customer_info.address1" placeholder="wpisz email klienta"/></div>
+        <div class="input-container"><input type="text" ng-model="invoice.customer_info.address2"/></div-->
+         
+         <div class="input-container "><label class="label_nabywca" for="exampleInputEmail1">NIP:</label><input style="text-align:left;width:300px;" type="text" ng-model="invoice.customer_info.NIP"  placeholder="Wpisz NIP klienta"/></div>
+        <div class="input-container"><input type="text" ng-model="invoice.customer_info.platnosc"/></div>
+        <div class="input-container" data-ng-hide='printMode'>
+          <!--select ng-model='currencySymbol' ng-options='currency.symbol as currency.name for currency in availableCurrencies'></select-->
+        </div>
+      </div>
+    </div>
+    <div class="items-table">
+      <div class="row header">
+        <div class="col-xs-05">&nbsp;</div>
+        <div class="col-xs-15">PKWIU</div>
+        <div class="col-xs-15">Nazwa usługi</div>
+        <div class="col-xs-1">Grupa</div>
+        <div class="col-xs-1">Pobyt</div>
+        <div class="col-xs-15">Wartość netto</div>
+        <div class="col-xs-1">St.Vat</div>
+        <div class="col-xs-15">Wartość podatku</div>
+        <div class="col-xs-15">Wartość brutto</div>
+      </div>
+      <div class="row invoice-item" ng-repeat="item in invoice.items" ng-animate="'slide-down'">
+        <form name="myForm" class="form-horizontal" >
+        <div class="col-xs-05 remove-item-container">
+          <a href ng-hide="printMode" ng-click="removeItem(item)" class="btn btn-danger">[X]</a>
+          <div ng-show="printMode"  class="col-xs-05">&nbsp;</div>
+        </div>
+        <div class="col-xs-15 input-container">
+          <input ng-model="item.pkwiu" placeholder="pkwiu" />
+        </div>
+        <div class="col-xs-15 input-container">
+          <input ng-model="item.description" placeholder="Nazwa usługi" />
+        </div>
+        <div class="col-xs-1 input-container">
+          <input ng-model="item.grupa" value="1" size="2" ng-required ng-validate="integer" placeholder="Grupa" />
+        </div>
+        <div class="col-xs-1 input-container">
+          <input ng-model="item.pobyt" value="1" size="2" ng-required ng-validate="integer" placeholder="pobyt" />
+        </div>
+        <div class="col-xs-15  input-container">
+          {{ (item.cost/(1+ item.vat/100) ).toFixed(2) | format_currency }}
+        </div>
+        <div class="col-xs-1 input-container">
+          <input ng-model="item.vat" value="1" size="2" ng-required ng-validate="integer" placeholder="vat" />
+        </div>
+        <div class="col-xs-15 input-container">
+          {{ (item.cost -  (item.cost/(1+ item.vat/100) ).toFixed(2)).toFixed(2) | format_currency }}
+        </div>
+        <div class="col-xs-15 input-container">
+          <span class="help-block" ng-show="!myForm.myDecimal.$valid">
+                    Uwaga: błędna liczba!
+                </span>
+          <input ng-hide="printMode" name="myDecimal" ng-model="item.cost" value="0.00" ng-required ng-validate="number" size="6" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01" placeholder="wartosc brutto" />
+          <div ng-show="printMode">   {{ item.cost | format_currency }}</div>
+        </div>
+        </form>
+      </div>
+      <div class="row invoice-item">
+        <div class="col-xs-12 add-item-container" ng-hide="printMode">
+          <a class="btn btn-primary" href ng-click="addItem()" >[+]</a>
+        </div>
+      </div>
+      <div class="row">
+      
+        <div class="col-xs-06 text-right">PODSUMOWANIE: </div>
+        <div class="col-xs-16">{{calculateNetto() | format_currency }}</div>
+        <div class="col-xs-1"></div>
+        <div class="col-xs-16">{{calculateTax() | format_currency}}</div>
+        <div class="col-xs-16">{{calculateGrandTotal() | format_currency}}</div>
+  
+      </div>
+       <div class="row" style="width:50%;float:left;padding:10px;">
+      
+        <div class="col-razem-text">Razem do zapłaty: </div>
+        <div class="col-razem-number">{{calculateGrandTotal() | format_currency}}</div>
+        <div class="col-razem-slownie">{{slownieGrandTotal()}}</div>
+      
+      </div>
+      <div class="podpis">
+      
+        <div class="col-razem-text">Podpis i pieczątka: </div>
+     
+      </div>
+      <div style="clear:both;"></div>
+       <div class="row">
+        <div class="col-razem-text-footer">Zapraszamy ponownie, Rezerwacja przez telefon lub online: wir-noclegi.pl</div>
+      </div>
+    </div>
+    <div class="row noPrint actions">
+      <a href="#" class="btn btn-primary" ng-show="printMode" ng-click="printInfo()">Drukuj</a>
+      <a href="#" class="btn btn-primary" ng-click="clearLocalStorage()">Wyczyść dane</a>
+      <a href="#" class="btn btn-primary" ng-hide="printMode" ng-click="printMode = true;">Włącz tryb drukowania</a>
+      <a href="#" class="btn btn-primary" ng-show="printMode" ng-click="printMode = false;">Wyłącz tryb drukowania</a>
+    </div>
+  </div>
+
+ 
+<!-- druga polowa -->
+
+ <div class="container" width="800px" id="invoice" ng-show="printMode" style="padding-top: 100px;" >
+    <div class="row">
+      <!--div class="col-xs-12 heading">
+        INVOICE
+      </div-->
+    </div>
+    <div class="row branding">
+      <div class="col-xs-6" style="padding-left: 200px;width: 70%;padding-top: 20px;">
+        <div class="invoice-number-container">
+          <label for="invoice-number">FAKTURA VAT NR: </label><input type="text" id="invoice-number" ng-model="invoice.invoice_number" />
+        </div>
+      </div>
+      <div class="col-xs-6 logo-container" style="width:30%;">
+       <div class="input-container">  <label class=" .right" for="exampleInputEmail1">Miejsce sprzedaży:</label><input type="text" ng-model="invoice.company_info.miejsce_sell" style="text-align: right;
+    width: 100px;"/></div>
+        <div class="input-container"> <label class=" .right" for="exampleInputEmail1">Data wystawienia:</label><input type="text" ng-model="invoice.company_info.data_wystawienia" style="text-align: right;
+    width: 100px;"/></div>
+        <div class="input-container"> <label class=" .right" for="exampleInputEmail1">Data sprzedaży:</label><input type="text" ng-model="invoice.company_info.data_sell" style="text-align: right;
+    width: 100px;"/></div>
+      </div>
+    </div>
+    <div class="row branding">
+      <div class="col-xs-6" style="text-align:center;">
+          <label for="invoice-number">SPRZEDAWCA</label>
+      </div>
+      <div class="col-xs-6" style="text-align:center;">
+          <label for="invoice-number">NABYWCA</label>
+      </div>
+    </div>
+    <div class="row infos" style="border-bottom: groove;padding-bottom: 3px;">
+      <div class="col-xs-6 " style="border-right: groove;">
+        <div class="input-container">
+		<textarea style="width:350px;overflow:hidden; resize:none;" rows="1" class="ng-valid ng-dirty ng-valid-parse ng-touched" ng-model="invoice.company_info.name" name="text" wrap="soft" maxlength="40" > </textarea>
+		</div>
+        <div class="input-container"><input type="text" ng-model="invoice.company_info.address1"/></div>
+        <div class="input-container"><input type="text" ng-model="invoice.company_info.postal"/></div>
+        <div class="input-container"><input type="text" ng-model="invoice.company_info.NIP"/></div>
+        <div class="input-container"><input type="text" ng-model="invoice.company_info.bank"/></div>
+      </div>
+      <div class="col-xs-6 right">
+        <div class="input-container">
+		   <label class="label_nabywca" for="exampleInputEmail1">NAZWA:</label>
+		    <textarea class=".infos .right"
+                 style="width:300px;overflow:hidden; resize:none;" 
+                 rows="2" 
+                 class="ng-valid ng-dirty ng-valid-parse ng-touched" 
+                 ng-model="invoice.customer_info.name"
+                 id="invoice.customer_info.name"
+                 name="text" wrap="soft" maxlength="40" 
+                 placeholder="Wpisz nazwę klienta"> </textarea>
+		    </div>
+       <label class="label_nabywca" for="exampleInputEmail1">ADRES:</label>
+        <textarea class=".infos .right"
+                 style="width:300px;overflow:hidden; resize:none;" 
+                 rows="2" 
+                 class="ng-valid ng-dirty ng-valid-parse ng-touched" 
+                 ng-model="invoice.customer_info.address1" 
+                 id="invoice.customer_info.address1" 
+                 name="text" wrap="soft" maxlength="40" 
+                 placeholder="Wpisz pełny adres klienta"> </textarea>         
+         <div class="input-container "><label class="label_nabywca" for="exampleInputEmail1">NIP:</label>
+              <input style="text-align:left;width:300px;" type="text" ng-model="invoice.customer_info.NIP"  placeholder="Wpisz NIP klienta"/>
+        </div>
+        <div class="input-container"><input type="text" ng-model="invoice.customer_info.platnosc"/></div>
+        <div class="input-container" data-ng-hide='printMode'>
+          <!--select ng-model='currencySymbol' ng-options='currency.symbol as currency.name for currency in availableCurrencies'></select-->
+        </div>
+      </div>
+    </div>
+    <div class="items-table">
+      <div class="row header">
+        <div class="col-xs-05">&nbsp;</div>
+        <div class="col-xs-15">PKWIU</div>
+        <div class="col-xs-15">Nazwa usługi</div>
+        <div class="col-xs-1">Grupa</div>
+        <div class="col-xs-1">Pobyt</div>
+        <div class="col-xs-15">Wartość netto</div>
+        <div class="col-xs-1">St.Vat</div>
+        <div class="col-xs-15">Wartość podatku</div>
+        <div class="col-xs-15">Wartość brutto</div>
+      </div>
+      <div class="row invoice-item" ng-repeat="item in invoice.items" ng-animate="'slide-down'">
+        <div class="col-xs-05 remove-item-container">
+          <a href ng-hide="printMode" ng-click="removeItem(item)" class="btn btn-danger">[X]</a>
+          <div ng-show="printMode"  class="col-xs-05">&nbsp;</div>
+        </div>
+        <div class="col-xs-15 input-container">
+          <input ng-model="item.pkwiu" placeholder="pkwiu" />
+        </div>
+        <div class="col-xs-15 input-container">
+          <input ng-model="item.description" placeholder="Nazwa usługi" />
+        </div>
+        <div class="col-xs-1 input-container">
+          <input ng-model="item.grupa" value="1" size="2" ng-required ng-validate="integer" placeholder="Grupa" />
+        </div>
+        <div class="col-xs-1 input-container">
+          <input ng-model="item.pobyt" value="1" size="2" ng-required ng-validate="integer" placeholder="pobyt" />
+        </div>
+        <div class="col-xs-15  input-container">
+          {{ (item.cost/(1+ item.vat/100) ).toFixed(2) | format_currency }}
+        </div>
+        <div class="col-xs-1 input-container">
+          <input ng-model="item.vat" value="1" size="2" ng-required ng-validate="integer" placeholder="vat" />
+        </div>
+        <div class="col-xs-15 input-container">
+          {{ (item.cost -  (item.cost/(1+ item.vat/100) ).toFixed(2)).toFixed(2) | format_currency }}
+        </div>
+        <div class="col-xs-15 input-container">
+          <input ng-hide="printMode" ng-model="item.cost" value="0.00" ng-required ng-validate="number" size="6" placeholder="wartosc brutto" />
+          <div ng-show="printMode">   {{ item.cost | format_currency }}</div>
+        </div>
+        
+      </div>
+      <div class="row invoice-item">
+        <div class="col-xs-12 add-item-container" ng-hide="printMode">
+          <a class="btn btn-primary" href ng-click="addItem()" >[+]</a>
+        </div>
+      </div>
+      <div class="row">
+      
+        <div class="col-xs-06 text-right">PODSUMOWANIE: </div>
+        <div class="col-xs-16">{{calculateNetto() | format_currency }}</div>
+        <div class="col-xs-1"></div>
+        <div class="col-xs-16">{{calculateTax() | format_currency}}</div>
+        <div class="col-xs-16">{{calculateGrandTotal() | format_currency}}</div>
+  
+      </div>
+       <div class="row" style="width:50%;float:left;padding:10px;">
+      
+        <div class="col-razem-text">Razem do zapłaty: </div>
+        <div class="col-razem-number">{{calculateGrandTotal() | format_currency}}</div>
+        <div class="col-razem-slownie">{{slownieGrandTotal()}}</div>
+      
+      </div>
+      <div class="podpis">
+      
+        <div class="col-razem-text">Podpis i pieczątka: </div>
+     
+      </div>
+      <div style="clear:both;"></div>
+       <div class="row">
+        <div class="col-razem-text-footer">Zapraszamy ponownie, Rezerwacja przez telefon lub online: wir-noclegi.pl</div>
+      </div>
+    </div>
+    <div class="row noPrint actions">
+    <a href="#" class="btn btn-primary" ng-show="printMode" ng-click="printInfo()">Drukuj</a>
+      <a href="#" class="btn btn-primary" ng-click="clearLocalStorage()">Wyczyść dane</a>
+      <a href="#" class="btn btn-primary" ng-hide="printMode" ng-click="printMode = true;">Włącz tryb drukowania</a>
+      <a href="#" class="btn btn-primary" ng-show="printMode" ng-click="printMode = false;">Wyłącz tryb drukowania</a>
+    </div>
+  </div>
+</body>
+</html>
